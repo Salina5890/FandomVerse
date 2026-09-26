@@ -20,6 +20,8 @@ dependencies:
 
   # Images
   cached_network_image: ^3.4.1
+  firebase_auth: ^6.1.0
+  cloud_firestore: ^6.0.0
 
   # Fonts
   google_fonts: ^6.2.1
@@ -54,6 +56,9 @@ dependencies:
   # Icons (Phosphor — pub.dev)
   phosphor_flutter:
     path: packages/phosphor_flutter
+  firebase_core: ^4.15.0
+  firebase_storage: ^13.6.0
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

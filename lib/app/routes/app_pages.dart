@@ -71,6 +71,9 @@ import '../../modules/profile/views/contact_view.dart';
 
 // Admin
 import '../../modules/admin/views/admin_dashboard_view.dart';
+import '../../modules/admin/views/admin_moderation_view.dart';
+import '../../modules/admin/views/admin_users_view.dart';
+import '../../modules/admin/views/admin_categories_view.dart';
 
 // Controllers needed by route bindings (fixes GetX "controller not found")
 import '../../modules/store/controllers/cart_controller.dart';
@@ -207,5 +210,8 @@ class AppPages {
 
     // ── Admin ─────────────────────────────────────────────────
     GetPage(name: AppRoutes.adminDashboard, page: () => const AdminDashboardView()),
+    GetPage(name: AppRoutes.adminContent, page: () => const AdminModerationView()),
+    GetPage(name: AppRoutes.adminUsers, page: () => const AdminUsersView()),
+    GetPage(name: AppRoutes.adminCategories, page: () => const AdminCategoriesView()),
   ];
 }

@@ -12,6 +12,7 @@ import '../../../core/storage/local_storage_service.dart';
 import '../../../core/widgets/fv_button.dart';
 import '../../../core/widgets/fv_text_field.dart';
 import '../../../data/models/misc_models.dart';
+import '../../../data/services/firestore_service.dart';
 
 class ContactView extends StatefulWidget {
   const ContactView({super.key});
@@ -45,6 +46,11 @@ class _ContactViewState extends State<ContactView> {
         createdAt: DateTime.now(),
       );
       await Get.find<LocalStorageService>().saveInquiry(inquiry.toMap());
+      try {
+        if (Get.isRegistered<FirestoreService>()) {
+          await Get.find<FirestoreService>().submitInquiry(inquiry.toMap());
+        }
+      } catch (_) {}
       if (!mounted) return;
       name.clear(); email.clear(); subject.clear(); message.clear();
       Get.snackbar('Submitted', 'Your inquiry has been submitted successfully.', snackPosition: SnackPosition.BOTTOM);

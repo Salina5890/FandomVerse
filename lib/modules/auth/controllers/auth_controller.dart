@@ -12,6 +12,7 @@ class AuthController extends GetxController {
 
   final RxBool isLoading = false.obs;
   final RxBool obscurePassword = true.obs;
+  final RxString adminErrorMessage = ''.obs;
 
   void togglePasswordVisibility() => obscurePassword.toggle();
 
@@ -84,8 +85,10 @@ class AuthController extends GetxController {
   }
 
   Future<void> loginAsAdmin() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      Get.snackbar('Error', 'Please fill all fields');
+    adminErrorMessage.value = '';
+    if (emailController.text.trim().isEmpty || passwordController.text.trim().isEmpty) {
+      adminErrorMessage.value = 'Please enter both admin email and password.';
+      Get.snackbar('Check Fields', adminErrorMessage.value);
       return;
     }
     isLoading.value = true;
@@ -93,9 +96,11 @@ class AuthController extends GetxController {
     isLoading.value = false;
 
     if (success && _authService.isAdmin) {
+      adminErrorMessage.value = '';
       Get.offAllNamed(AppRoutes.adminDashboard);
     } else {
-      Get.snackbar('Error', 'Invalid credentials or not an admin');
+      adminErrorMessage.value = 'Invalid admin credentials. Please verify and try again.';
+      Get.snackbar('Login Failed', adminErrorMessage.value);
     }
   }
 }

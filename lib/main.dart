@@ -1,26 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'app/app.dart';
 import 'core/storage/local_storage_service.dart';
 import 'data/services/auth_service.dart';
 import 'data/services/seed_data_service.dart';
 import 'data/services/notification_service.dart';
+import 'data/services/firestore_service.dart';
+import 'data/services/ai_service.dart';
 import 'core/theme/theme_controller.dart';
 import 'core/language/language_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Make status bar transparent
-  // ── Pre-initialize ALL critical services BEFORE runApp ────
-  // This prevents "AuthService not found" GetX errors.
+  // Initialize Firebase for supported platforms
+  try {
+    if (kIsWeb ||
+        defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } else {
+      await Firebase.initializeApp();
+    }
+  } catch (e) {
+    debugPrint('Firebase init note: $e');
+  }
+
+  // Core local storage and seed services
   await Get.putAsync<LocalStorageService>(
     () => LocalStorageService().init(),
     permanent: true,
@@ -28,17 +45,15 @@ void main() async {
 
   Get.put(SeedDataService(), permanent: true);
 
-  // Theme (light / dark) — must exist before the first frame so AppColors
-  // resolves to the saved mode.
-  Get.put<ThemeController>(ThemeController().init(), permanent: true);
+  // Backend & AI services
+  await Get.putAsync<FirestoreService>(() => FirestoreService().init(), permanent: true);
+  await Get.putAsync<AiService>(() => AiService().init(), permanent: true);
 
-  // Language — must exist before the first frame so GetMaterialApp's
-  // `locale` resolves to the saved language immediately.
+  // App theme and localization controllers
+  Get.put<ThemeController>(ThemeController().init(), permanent: true);
   Get.put<LanguageController>(LanguageController().init(), permanent: true);
 
-  // AuthService and NotificationService only depend on LocalStorageService
-  // (already ready above), not on each other, so initialize them
-  // concurrently instead of one after the other.
+  // User auth and local notifications
   await Future.wait([
     Get.putAsync<AuthService>(() => AuthService().init(), permanent: true),
     Get.putAsync<NotificationService>(

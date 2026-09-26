@@ -69,7 +69,34 @@ class AdminLoginView extends StatelessWidget {
                   onPressed: controller.togglePasswordVisibility,
                 ),
               )),
-              const SizedBox(height: AppSpacing.xl),
+              Obx(() {
+                if (controller.adminErrorMessage.value.isEmpty) {
+                  return const SizedBox(height: AppSpacing.xl);
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        FVIcon(PhosphorIconsRegular.warningCircle, color: AppColors.error, size: 20),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            controller.adminErrorMessage.value,
+                            style: AppTypography.bodySmall.copyWith(color: AppColors.error),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
               Obx(() => FVButton(
                 text: 'Login to Dashboard',
                 onPressed: controller.loginAsAdmin,

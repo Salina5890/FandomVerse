@@ -1,93 +1,421 @@
 import 'package:get/get.dart';
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/seed_data_service.dart';
-
-/// One row in any admin list (user, content, product or category).
-class AdminEntry {
-  final String id;
-  String title;
-  String subtitle;
-  String tag;
-  AdminEntry(this.id, this.title, this.subtitle, this.tag);
-}
+import '../../../data/services/firestore_service.dart';
+import '../../../data/models/user_model.dart';
+import '../../../data/models/content_model.dart';
+import '../../../data/models/event_model.dart';
+import '../../../data/models/product_model.dart';
 
 class AdminDashboardController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
+  FirestoreService? get _firestore => Get.isRegistered<FirestoreService>() ? Get.find<FirestoreService>() : null;
 
-  final RxInt selectedMenuIndex = 0.obs;
+  // Selected tab index for moderation screen (0 = Posts, 1 = Events, 2 = Merchandise)
+  final RxInt moderationTabIndex = 0.obs;
 
-  final RxList<AdminEntry> users = <AdminEntry>[].obs;
-  final RxList<AdminEntry> content = <AdminEntry>[].obs;
-  final RxList<AdminEntry> events = <AdminEntry>[].obs;
-  final RxList<AdminEntry> products = <AdminEntry>[].obs;
-  final RxList<AdminEntry> categories = <AdminEntry>[].obs;
-  final RxList<String> activity = <String>[].obs;
+  // Data lists
+  final RxList<UserModel> users = <UserModel>[].obs;
+  final RxList<ContentModel> posts = <ContentModel>[].obs;
+  final RxList<EventModel> events = <EventModel>[].obs;
+  final RxList<ProductModel> products = <ProductModel>[].obs;
+  final RxList<Map<String, dynamic>> categories = <Map<String, dynamic>>[].obs;
+  final RxList<String> recentActivity = <String>[].obs;
+
+  // Search filter for User Management
+  final RxString userSearchQuery = ''.obs;
+
+  // Summary counts
+  int get totalUsersCount => users.length;
+  int get totalPostsCount => posts.length;
+  int get totalEventsCount => events.length;
+  int get totalProductsCount => products.length;
+
+  List<UserModel> get filteredUsers {
+    final query = userSearchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return users;
+    return users.where((u) {
+      return u.name.toLowerCase().contains(query) || u.email.toLowerCase().contains(query);
+    }).toList();
+  }
 
   @override
   void onInit() {
     super.onInit();
+    loadDashboardData();
+  }
+
+  Future<void> loadDashboardData() async {
+    // Initial users from seed
     users.assignAll([
-      AdminEntry('u1', 'Ayesha Khan', 'ayesha@fandomverse.app', 'Fan'),
-      AdminEntry('u2', 'Sakura Kim', 'demo@fandomverse.app', 'Fan'),
-      AdminEntry('u3', 'Sana Tariq', 'sana@fandomverse.app', 'Fan'),
-      AdminEntry('u4', 'Ahmed Raza', 'ahmed@fandomverse.app', 'Fan'),
-      AdminEntry('u5', 'Alex Verse', 'admin@fandomverse.app', 'Admin'),
+      SeedDataService.demoAdmin,
+      SeedDataService.demoFan,
+      UserModel(
+        id: 'u3',
+        name: 'Ayesha Khan',
+        email: 'ayesha@fandomverse.app',
+        role: 'fan',
+        selectedFandomIds: ['f1', 'f4'],
+        createdAt: DateTime.now().subtract(const Duration(days: 45)),
+        updatedAt: DateTime.now(),
+      ),
+      UserModel(
+        id: 'u4',
+        name: 'Sana Tariq',
+        email: 'sana@fandomverse.app',
+        role: 'fan',
+        selectedFandomIds: ['f2', 'f6'],
+        createdAt: DateTime.now().subtract(const Duration(days: 20)),
+        updatedAt: DateTime.now(),
+      ),
+      UserModel(
+        id: 'u5',
+        name: 'Ahmed Raza',
+        email: 'ahmed@fandomverse.app',
+        role: 'fan',
+        selectedFandomIds: ['f3', 'f5'],
+        createdAt: DateTime.now().subtract(const Duration(days: 10)),
+        updatedAt: DateTime.now(),
+      ),
     ]);
-    content.assignAll(SeedDataService.contentItems
-        .map((c) => AdminEntry(c.id, c.title, c.contentType.label, c.isPublished ? 'Live' : 'Draft'))
-        .toList());
-    events.assignAll(SeedDataService.events
-        .map((e) => AdminEntry(e.id, e.title, '${e.city} • ${e.venue}', e.status))
-        .toList());
-    products.assignAll(SeedDataService.products
-        .map((p) => AdminEntry(p.id, p.name, '\$${p.price.toStringAsFixed(2)}', '${p.stock} in stock'))
-        .toList());
-    categories.assignAll(SeedDataService.categories
-        .map((c) => AdminEntry('${c['id']}', '${c['name']}', '${c['description'] ?? ''}', '${c['type'] ?? ''}'))
-        .toList());
-    activity.assignAll([
-      'New user registered',
-      'Event added',
-      'Product updated',
-      'Content published',
+
+    posts.assignAll(SeedDataService.contentItems);
+    events.assignAll(SeedDataService.events);
+    products.assignAll(SeedDataService.products);
+    categories.assignAll(SeedDataService.categories.map((c) => Map<String, dynamic>.from(c as Map)).toList());
+
+    recentActivity.assignAll([
+      'New fan registered: Sakura Kim',
+      'Event published: Tokyo Anime Expo 2026',
+      'Product updated: Demon Slayer Katana Replica',
+      'Post published: Attack on Titan Finale Analysis',
     ]);
+
+    // Fetch live data from Firestore if available
+    try {
+      final remoteUsers = await _firestore?.getAllUsers();
+      if (remoteUsers != null && remoteUsers.isNotEmpty) {
+        for (final u in remoteUsers) {
+          if (!users.any((x) => x.id == u.id)) {
+            users.add(u);
+          }
+        }
+      }
+
+      final remotePosts = await _firestore?.getAllContent();
+      if (remotePosts != null && remotePosts.isNotEmpty) {
+        posts.assignAll(remotePosts);
+      }
+
+      final remoteEvents = await _firestore?.getAllEvents();
+      if (remoteEvents != null && remoteEvents.isNotEmpty) {
+        events.assignAll(remoteEvents);
+      }
+
+      final remoteProducts = await _firestore?.getAllProducts();
+      if (remoteProducts != null && remoteProducts.isNotEmpty) {
+        products.assignAll(remoteProducts);
+      }
+
+      final remoteCats = await _firestore?.getAllCategories();
+      if (remoteCats != null && remoteCats.isNotEmpty) {
+        categories.assignAll(remoteCats);
+      }
+    } catch (_) {}
   }
 
-  RxList<AdminEntry> listFor(int menu) {
-    switch (menu) {
-      case 1:
-        return users;
-      case 2:
-        return content;
-      case 3:
-        return events;
-      case 4:
-        return products;
-      default:
-        return categories;
+  // --- Content / Posts Moderation ---
+
+  Future<void> addPost({
+    required String title,
+    required String fandomCategory,
+    required String body,
+    String? imageUrl,
+  }) async {
+    final newId = 'post_${DateTime.now().millisecondsSinceEpoch}';
+    final newPost = ContentModel(
+      id: newId,
+      title: title.trim(),
+      description: body.length > 80 ? '${body.substring(0, 80)}...' : body,
+      body: body.trim(),
+      imageUrl: imageUrl?.trim().isNotEmpty == true ? imageUrl!.trim() : 'https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800&q=80',
+      contentType: ContentType.news,
+      fandomId: 'f1',
+      fandomName: fandomCategory,
+      author: 'Admin',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    posts.insert(0, newPost);
+    recentActivity.insert(0, 'Added post: "$title"');
+    await _firestore?.saveContent(newPost);
+  }
+
+  Future<void> editPost({
+    required String id,
+    required String title,
+    required String fandomCategory,
+    required String body,
+    String? imageUrl,
+  }) async {
+    final index = posts.indexWhere((p) => p.id == id);
+    if (index == -1) return;
+
+    final existing = posts[index];
+    final updated = existing.copyWith(
+      title: title.trim(),
+      fandomName: fandomCategory.trim(),
+      body: body.trim(),
+      imageUrl: imageUrl?.trim().isNotEmpty == true ? imageUrl!.trim() : existing.imageUrl,
+      updatedAt: DateTime.now(),
+    );
+
+    posts[index] = updated;
+    recentActivity.insert(0, 'Updated post: "$title"');
+    await _firestore?.saveContent(updated);
+  }
+
+  Future<void> deletePost(String id) async {
+    final item = posts.firstWhereOrNull((p) => p.id == id);
+    posts.removeWhere((p) => p.id == id);
+    if (item != null) {
+      recentActivity.insert(0, 'Deleted post: "${item.title}"');
     }
+    await _firestore?.deleteContent(id);
   }
 
-  void changeMenu(int index) => selectedMenuIndex.value = index;
+  // --- Events Moderation ---
 
-  void add(int menu, String title, String subtitle) {
-    if (title.trim().isEmpty) return;
-    final id = '${menu}_${DateTime.now().millisecondsSinceEpoch}';
-    listFor(menu).insert(0, AdminEntry(id, title.trim(), subtitle.trim(), 'New'));
-    activity.insert(0, 'Added "${title.trim()}"');
+  Future<void> addEvent({
+    required String title,
+    required String city,
+    required DateTime date,
+    String? ticketLink,
+    String? venue,
+  }) async {
+    final newId = 'event_${DateTime.now().millisecondsSinceEpoch}';
+    final newEvent = EventModel(
+      id: newId,
+      title: title.trim(),
+      description: 'Official fan event and gathering in $city.',
+      city: city.trim(),
+      venue: venue?.trim().isNotEmpty == true ? venue!.trim() : 'Convention Arena',
+      address: '$city Center',
+      eventDate: date,
+      ticketLink: ticketLink?.trim(),
+      category: 'Conventions',
+      fandomId: 'f1',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    events.insert(0, newEvent);
+    recentActivity.insert(0, 'Added event: "$title"');
+    await _firestore?.saveEvent(newEvent);
   }
 
-  void edit(int menu, AdminEntry e, String title, String subtitle) {
-    if (title.trim().isEmpty) return;
-    e.title = title.trim();
-    e.subtitle = subtitle.trim();
-    listFor(menu).refresh();
-    activity.insert(0, 'Updated "${e.title}"');
+  Future<void> editEvent({
+    required String id,
+    required String title,
+    required String city,
+    required DateTime date,
+    String? ticketLink,
+    String? venue,
+  }) async {
+    final index = events.indexWhere((e) => e.id == id);
+    if (index == -1) return;
+
+    final existing = events[index];
+    final updated = existing.copyWith(
+      title: title.trim(),
+      city: city.trim(),
+      venue: venue?.trim().isNotEmpty == true ? venue!.trim() : existing.venue,
+      eventDate: date,
+      ticketLink: ticketLink?.trim().isNotEmpty == true ? ticketLink!.trim() : existing.ticketLink,
+      updatedAt: DateTime.now(),
+    );
+
+    events[index] = updated;
+    recentActivity.insert(0, 'Updated event: "$title"');
+    await _firestore?.saveEvent(updated);
   }
 
-  void remove(int menu, AdminEntry e) {
-    listFor(menu).remove(e);
-    activity.insert(0, 'Removed "${e.title}"');
+  Future<void> deleteEvent(String id) async {
+    final item = events.firstWhereOrNull((e) => e.id == id);
+    events.removeWhere((e) => e.id == id);
+    if (item != null) {
+      recentActivity.insert(0, 'Deleted event: "${item.title}"');
+    }
+    await _firestore?.deleteEvent(id);
+  }
+
+  // --- Merchandise Products Moderation ---
+
+  Future<void> addProduct({
+    required String name,
+    required double price,
+    required String category,
+    String? imageUrl,
+  }) async {
+    final newId = 'prod_${DateTime.now().millisecondsSinceEpoch}';
+    final newProduct = ProductModel(
+      id: newId,
+      name: name.trim(),
+      description: 'Official premium fan merchandise item.',
+      price: price,
+      categoryName: category.trim(),
+      categoryId: category.toLowerCase().replaceAll(' ', '_'),
+      fandomId: 'f1',
+      imageUrl: imageUrl?.trim().isNotEmpty == true ? imageUrl!.trim() : 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&q=80',
+      stock: 25,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    products.insert(0, newProduct);
+    recentActivity.insert(0, 'Added product: "$name"');
+    await _firestore?.saveProduct(newProduct);
+  }
+
+  Future<void> editProduct({
+    required String id,
+    required String name,
+    required double price,
+    required String category,
+    String? imageUrl,
+  }) async {
+    final index = products.indexWhere((p) => p.id == id);
+    if (index == -1) return;
+
+    final existing = products[index];
+    final updated = existing.copyWith(
+      name: name.trim(),
+      price: price,
+      categoryName: category.trim(),
+      categoryId: category.toLowerCase().replaceAll(' ', '_'),
+      imageUrl: imageUrl?.trim().isNotEmpty == true ? imageUrl!.trim() : existing.imageUrl,
+      updatedAt: DateTime.now(),
+    );
+
+    products[index] = updated;
+    recentActivity.insert(0, 'Updated product: "$name"');
+    await _firestore?.saveProduct(updated);
+  }
+
+  Future<void> deleteProduct(String id) async {
+    final item = products.firstWhereOrNull((p) => p.id == id);
+    products.removeWhere((p) => p.id == id);
+    if (item != null) {
+      recentActivity.insert(0, 'Deleted product: "${item.name}"');
+    }
+    await _firestore?.deleteProduct(id);
+  }
+
+  // --- User Management ---
+
+  Future<void> addUser({
+    required String name,
+    required String email,
+    String role = 'fan',
+    List<String> fandoms = const ['f1', 'f4'],
+  }) async {
+    final newId = 'user_${DateTime.now().millisecondsSinceEpoch}';
+    final newUser = UserModel(
+      id: newId,
+      name: name.trim(),
+      email: email.trim(),
+      role: role,
+      selectedFandomIds: fandoms,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    users.insert(0, newUser);
+    recentActivity.insert(0, 'Added user: "$name"');
+    await _firestore?.saveUser(newUser);
+  }
+
+  Future<void> editUser({
+    required String id,
+    required String name,
+    required String email,
+  }) async {
+    final index = users.indexWhere((u) => u.id == id);
+    if (index == -1) return;
+
+    final existing = users[index];
+    final updated = existing.copyWith(
+      name: name.trim(),
+      email: email.trim(),
+      updatedAt: DateTime.now(),
+    );
+
+    users[index] = updated;
+    recentActivity.insert(0, 'Updated user: "$name"');
+    await _firestore?.saveUser(updated);
+  }
+
+  Future<void> deleteUser(String id) async {
+    final item = users.firstWhereOrNull((u) => u.id == id);
+    users.removeWhere((u) => u.id == id);
+    if (item != null) {
+      recentActivity.insert(0, 'Deleted user: "${item.name}"');
+    }
+    await _firestore?.deleteUser(id);
+  }
+
+  // --- Category Management ---
+
+  Future<void> addCategory({
+    required String name,
+    String? description,
+    String? icon,
+  }) async {
+    final newId = 'cat_${DateTime.now().millisecondsSinceEpoch}';
+    final newCat = {
+      'id': newId,
+      'name': name.trim(),
+      'description': description?.trim() ?? 'Fandom category',
+      'icon': icon?.trim() ?? 'tag',
+      'type': 'fandom',
+      'display_order': categories.length + 1,
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    categories.add(newCat);
+    recentActivity.insert(0, 'Added category: "$name"');
+    await _firestore?.saveCategory(newCat);
+  }
+
+  Future<void> editCategory({
+    required String id,
+    required String name,
+    String? description,
+    String? icon,
+  }) async {
+    final index = categories.indexWhere((c) => c['id'].toString() == id);
+    if (index == -1) return;
+
+    final existing = categories[index];
+    final updated = Map<String, dynamic>.from(existing);
+    updated['name'] = name.trim();
+    if (description != null) updated['description'] = description.trim();
+    if (icon != null) updated['icon'] = icon.trim();
+    updated['updated_at'] = DateTime.now().toIso8601String();
+
+    categories[index] = updated;
+    recentActivity.insert(0, 'Updated category: "$name"');
+    await _firestore?.saveCategory(updated);
+  }
+
+  Future<void> deleteCategory(String id) async {
+    final item = categories.firstWhereOrNull((c) => c['id'].toString() == id);
+    categories.removeWhere((c) => c['id'].toString() == id);
+    if (item != null) {
+      recentActivity.insert(0, 'Deleted category: "${item['name']}"');
+    }
+    await _firestore?.deleteCategory(id);
   }
 
   void logout() => _authService.logout();

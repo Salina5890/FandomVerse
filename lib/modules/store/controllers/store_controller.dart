@@ -3,6 +3,7 @@ import '../../../data/models/product_model.dart';
 import '../../../data/models/cart_models.dart';
 import '../../../data/services/seed_data_service.dart';
 import '../../../core/storage/local_storage_service.dart';
+import '../../../data/services/firestore_service.dart';
 
 enum ProductSort { featured, priceLowHigh, priceHighLow, newest }
 
@@ -35,29 +36,48 @@ class StoreController extends GetxController {
   bool isWishlisted(String productId) => wishlistedProductIds.contains(productId);
 
   Future<void> toggleWishlist(ProductModel product) async {
+    final userId = _localStorage.userId ?? 'guest';
+    final firestore = Get.isRegistered<FirestoreService>() ? Get.find<FirestoreService>() : null;
+
     if (wishlistedProductIds.contains(product.id)) {
       await _localStorage.removeWishlistItem(product.id);
       wishlistedProductIds.remove(product.id);
+      await firestore?.removeFromWishlist(userId, product.id);
     } else {
       await _localStorage.saveWishlistItem(WishlistItemModel(
         id: product.id,
         productId: product.id,
-        userId: _localStorage.userId ?? 'guest',
+        userId: userId,
         productName: product.name,
         productImageUrl: product.imageUrl,
         productPrice: product.effectivePrice,
         addedAt: DateTime.now(),
       ));
       wishlistedProductIds.add(product.id);
+      await firestore?.addToWishlist(userId, product.id);
     }
   }
 
   Future<void> _loadStoreData() async {
     isLoading.value = true;
-    await Future<void>.delayed(const Duration(milliseconds: 300));
+    final firestore = Get.isRegistered<FirestoreService>() ? Get.find<FirestoreService>() : null;
+    
     categories.assignAll(SeedDataService.categories);
-    allProducts.assignAll(SeedDataService.products);
-    featuredProducts.assignAll(SeedDataService.featuredProducts);
+
+    try {
+      final remoteProducts = await firestore?.getAllProducts();
+      if (remoteProducts != null && remoteProducts.isNotEmpty) {
+        allProducts.assignAll(remoteProducts);
+        featuredProducts.assignAll(remoteProducts.where((p) => p.isFeatured).toList());
+      } else {
+        allProducts.assignAll(SeedDataService.products);
+        featuredProducts.assignAll(SeedDataService.featuredProducts);
+      }
+    } catch (_) {
+      allProducts.assignAll(SeedDataService.products);
+      featuredProducts.assignAll(SeedDataService.featuredProducts);
+    }
+
     applyFilters();
     isLoading.value = false;
   }
