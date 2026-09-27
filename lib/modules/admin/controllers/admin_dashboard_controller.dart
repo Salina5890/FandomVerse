@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+
 import '../../../data/services/auth_service.dart';
 import '../../../data/services/seed_data_service.dart';
 import '../../../data/services/firestore_service.dart';
@@ -9,7 +10,9 @@ import '../../../data/models/product_model.dart';
 
 class AdminDashboardController extends GetxController {
   final AuthService _authService = Get.find<AuthService>();
-  FirestoreService? get _firestore => Get.isRegistered<FirestoreService>() ? Get.find<FirestoreService>() : null;
+  FirestoreService? get _firestore => Get.isRegistered<FirestoreService>()
+      ? Get.find<FirestoreService>()
+      : null;
 
   // Selected tab index for moderation screen (0 = Posts, 1 = Events, 2 = Merchandise)
   final RxInt moderationTabIndex = 0.obs;
@@ -35,7 +38,8 @@ class AdminDashboardController extends GetxController {
     final query = userSearchQuery.value.trim().toLowerCase();
     if (query.isEmpty) return users;
     return users.where((u) {
-      return u.name.toLowerCase().contains(query) || u.email.toLowerCase().contains(query);
+      return u.name.toLowerCase().contains(query) ||
+          u.email.toLowerCase().contains(query);
     }).toList();
   }
 
@@ -82,7 +86,11 @@ class AdminDashboardController extends GetxController {
     posts.assignAll(SeedDataService.contentItems);
     events.assignAll(SeedDataService.events);
     products.assignAll(SeedDataService.products);
-    categories.assignAll(SeedDataService.categories.map((c) => Map<String, dynamic>.from(c as Map)).toList());
+    categories.assignAll(
+      SeedDataService.categories
+          .map((c) => Map<String, dynamic>.from(c as Map))
+          .toList(),
+    );
 
     recentActivity.assignAll([
       'New fan registered: Sakura Kim',
@@ -91,36 +99,35 @@ class AdminDashboardController extends GetxController {
       'Post published: Attack on Titan Finale Analysis',
     ]);
 
-    // Fetch live data from Firestore if available
+    // Fetch live data from Firestore in parallel — one slow/unreachable
+    // collection no longer blocks the others or freezes the dashboard.
     try {
-      final remoteUsers = await _firestore?.getAllUsers();
-      if (remoteUsers != null && remoteUsers.isNotEmpty) {
+      final results = await Future.wait([
+        _firestore?.getAllUsers() ?? Future.value(<UserModel>[]),
+        _firestore?.getAllContent() ?? Future.value(<ContentModel>[]),
+        _firestore?.getAllEvents() ?? Future.value(<EventModel>[]),
+        _firestore?.getAllProducts() ?? Future.value(<ProductModel>[]),
+        _firestore?.getAllCategories() ??
+            Future.value(<Map<String, dynamic>>[]),
+      ]);
+
+      final remoteUsers = results[0] as List<UserModel>;
+      final remotePosts = results[1] as List<ContentModel>;
+      final remoteEvents = results[2] as List<EventModel>;
+      final remoteProducts = results[3] as List<ProductModel>;
+      final remoteCats = results[4] as List<Map<String, dynamic>>;
+
+      if (remoteUsers.isNotEmpty) {
         for (final u in remoteUsers) {
           if (!users.any((x) => x.id == u.id)) {
             users.add(u);
           }
         }
       }
-
-      final remotePosts = await _firestore?.getAllContent();
-      if (remotePosts != null && remotePosts.isNotEmpty) {
-        posts.assignAll(remotePosts);
-      }
-
-      final remoteEvents = await _firestore?.getAllEvents();
-      if (remoteEvents != null && remoteEvents.isNotEmpty) {
-        events.assignAll(remoteEvents);
-      }
-
-      final remoteProducts = await _firestore?.getAllProducts();
-      if (remoteProducts != null && remoteProducts.isNotEmpty) {
-        products.assignAll(remoteProducts);
-      }
-
-      final remoteCats = await _firestore?.getAllCategories();
-      if (remoteCats != null && remoteCats.isNotEmpty) {
-        categories.assignAll(remoteCats);
-      }
+      if (remotePosts.isNotEmpty) posts.assignAll(remotePosts);
+      if (remoteEvents.isNotEmpty) events.assignAll(remoteEvents);
+      if (remoteProducts.isNotEmpty) products.assignAll(remoteProducts);
+      if (remoteCats.isNotEmpty) categories.assignAll(remoteCats);
     } catch (_) {}
   }
 
@@ -167,7 +174,9 @@ class AdminDashboardController extends GetxController {
       title: title.trim(),
       fandomName: fandomCategory.trim(),
       body: body.trim(),
-      imageUrl: imageUrl?.trim().isNotEmpty == true ? imageUrl!.trim() : existing.imageUrl,
+      imageUrl: imageUrl?.trim().isNotEmpty == true
+          ? imageUrl!.trim()
+          : existing.imageUrl,
       updatedAt: DateTime.now(),
     );
 
@@ -200,7 +209,9 @@ class AdminDashboardController extends GetxController {
       title: title.trim(),
       description: 'Official fan event and gathering in $city.',
       city: city.trim(),
-      venue: venue?.trim().isNotEmpty == true ? venue!.trim() : 'Convention Arena',
+      venue: venue?.trim().isNotEmpty == true
+          ? venue!.trim()
+          : 'Convention Arena',
       address: '$city Center',
       eventDate: date,
       ticketLink: ticketLink?.trim(),
@@ -232,7 +243,9 @@ class AdminDashboardController extends GetxController {
       city: city.trim(),
       venue: venue?.trim().isNotEmpty == true ? venue!.trim() : existing.venue,
       eventDate: date,
-      ticketLink: ticketLink?.trim().isNotEmpty == true ? ticketLink!.trim() : existing.ticketLink,
+      ticketLink: ticketLink?.trim().isNotEmpty == true
+          ? ticketLink!.trim()
+          : existing.ticketLink,
       updatedAt: DateTime.now(),
     );
 
@@ -294,7 +307,9 @@ class AdminDashboardController extends GetxController {
       price: price,
       categoryName: category.trim(),
       categoryId: category.toLowerCase().replaceAll(' ', '_'),
-      imageUrl: imageUrl?.trim().isNotEmpty == true ? imageUrl!.trim() : existing.imageUrl,
+      imageUrl: imageUrl?.trim().isNotEmpty == true
+          ? imageUrl!.trim()
+          : existing.imageUrl,
       updatedAt: DateTime.now(),
     );
 

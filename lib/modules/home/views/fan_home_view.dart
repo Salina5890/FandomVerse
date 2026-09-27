@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+
 import '../../../core/widgets/fv_icon.dart';
+
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -17,7 +19,9 @@ import '../../../data/models/content_model.dart';
 import '../../../data/models/event_model.dart';
 import '../../../data/models/fandom_model.dart';
 import '../controllers/fan_home_controller.dart';
+
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+
 import '../../../core/widgets/fv_animations.dart';
 
 class FanHomeView extends StatelessWidget {
@@ -25,7 +29,9 @@ class FanHomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.isRegistered<FanHomeController>() ? Get.find<FanHomeController>() : Get.put(FanHomeController());
+    final controller = Get.isRegistered<FanHomeController>()
+        ? Get.find<FanHomeController>()
+        : Get.put(FanHomeController());
     final size = MediaQuery.sizeOf(context);
 
     return Scaffold(
@@ -99,9 +105,19 @@ class FanHomeView extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Welcome back, fan.', style: AppTypography.headingSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(
+                            'Welcome back, fan.',
+                            style: AppTypography.headingSmall,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                           const SizedBox(height: 3),
-                          Text('Your universe, all in one place.', style: AppTypography.caption, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          Text(
+                            'Your universe, all in one place.',
+                            style: AppTypography.caption,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
                       ),
                     ),
@@ -109,7 +125,10 @@ class FanHomeView extends StatelessWidget {
                 ],
               ),
             ),
-            const Padding(padding: EdgeInsets.only(top: 6), child: FVThemeToggle()),
+            const Padding(
+              padding: EdgeInsets.only(top: 6),
+              child: FVThemeToggle(),
+            ),
             const SizedBox(width: 8),
             _IconButton(
               icon: PhosphorIconsRegular.magnifyingGlass,
@@ -149,7 +168,11 @@ class FanHomeView extends StatelessWidget {
                 gradient: const LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
-                  colors: [Colors.transparent, Color(0x990A0A0F), Color(0xF20A0A0F)],
+                  colors: [
+                    Colors.transparent,
+                    Color(0x990A0A0F),
+                    Color(0xF20A0A0F),
+                  ],
                   stops: [0.05, 0.48, 1],
                 ),
               ),
@@ -157,7 +180,10 @@ class FanHomeView extends StatelessWidget {
             Positioned(
               top: 18,
               right: 18,
-              child: _GlassPill(icon: PhosphorIconsRegular.fire, text: 'TRENDING NOW'),
+              child: _GlassPill(
+                icon: PhosphorIconsRegular.fire,
+                text: 'TRENDING NOW',
+              ),
             ),
             Positioned(
               left: 22,
@@ -166,11 +192,17 @@ class FanHomeView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('YOUR NEXT\nOBSESSION', style: AppTypography.displayMedium.copyWith(fontSize: 34)),
+                  Text(
+                    'YOUR NEXT\nOBSESSION',
+                    style: AppTypography.displayMedium.copyWith(fontSize: 34),
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'Discover stories, characters, lore and events from the fandoms you love.',
-                    style: AppTypography.bodySmall.copyWith(color: Colors.white.withOpacity(.78), height: 1.45),
+                    style: AppTypography.bodySmall.copyWith(
+                      color: Colors.white.withOpacity(.78),
+                      height: 1.45,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -180,14 +212,28 @@ class FanHomeView extends StatelessWidget {
                         style: FilledButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 17,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
-                        icon: const FVIcon(PhosphorIconsRegular.compass, size: 18),
-                        label: Text('Explore universe', style: AppTypography.buttonSmall),
+                        icon: const FVIcon(
+                          PhosphorIconsRegular.compass,
+                          size: 18,
+                        ),
+                        label: Text(
+                          'Explore universe',
+                          style: AppTypography.buttonSmall,
+                        ),
                       ),
                       const SizedBox(width: 10),
-                      _CircleAction(icon: PhosphorIconsRegular.bookmarkSimple, onTap: () => Get.toNamed(AppRoutes.bookmarks)),
+                      _CircleAction(
+                        icon: PhosphorIconsRegular.bookmarkSimple,
+                        onTap: () => Get.toNamed(AppRoutes.bookmarks),
+                      ),
                     ],
                   ),
                 ],
@@ -230,7 +276,11 @@ class FanHomeView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  FVIcon(item.$2, size: 23, color: index == 1 ? AppColors.cyan : AppColors.primaryLight),
+                  FVIcon(
+                    item.$2,
+                    size: 23,
+                    color: index == 1 ? AppColors.cyan : AppColors.primaryLight,
+                  ),
                   Text(item.$1, style: AppTypography.labelMedium),
                 ],
               ),
@@ -253,7 +303,9 @@ class FanHomeView extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: controller.featuredContent.length,
         separatorBuilder: (_, __) => const SizedBox(width: 14),
-        itemBuilder: (_, index) => _ContentCard(content: controller.featuredContent[index]).fvInX(index),
+        itemBuilder: (_, index) =>
+            _ContentCard(content: controller.featuredContent[index])
+                .fvInX(index),
       ),
     );
   }
@@ -268,28 +320,53 @@ class FanHomeView extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: AppColors.cyanGradient,
             borderRadius: BorderRadius.circular(22),
-            boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(.18), blurRadius: 28, spreadRadius: -8)],
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withOpacity(.18),
+                blurRadius: 28,
+                spreadRadius: -8,
+              ),
+            ],
           ),
           child: Row(
             children: [
               Container(
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(color: Colors.black.withOpacity(.2), shape: BoxShape.circle),
-                child: const FVIcon(PhosphorIconsRegular.bookOpen, color: Colors.white),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const FVIcon(
+                  PhosphorIconsRegular.bookOpen,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('FAN HUB', style: AppTypography.overline.copyWith(color: Colors.white.withOpacity(.8))),
+                    Text(
+                      'FAN HUB',
+                      style: AppTypography.overline.copyWith(
+                        color: Colors.white.withOpacity(.8),
+                      ),
+                    ),
                     const SizedBox(height: 3),
-                    Text('Go deeper into the stories you love.', style: AppTypography.headingMedium.copyWith(color: Colors.white)),
+                    Text(
+                      'Go deeper into the stories you love.',
+                      style: AppTypography.headingMedium.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const FVIcon(PhosphorIconsRegular.arrowRight, color: Colors.white),
+              const FVIcon(
+                PhosphorIconsRegular.arrowRight,
+                color: Colors.white,
+              ),
             ],
           ),
         ),
@@ -305,7 +382,8 @@ class FanHomeView extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: controller.upcomingEvents.length,
         separatorBuilder: (_, __) => const SizedBox(width: 14),
-        itemBuilder: (_, index) => _EventCard(event: controller.upcomingEvents[index]).fvInX(index),
+        itemBuilder: (_, index) =>
+            _EventCard(event: controller.upcomingEvents[index]).fvInX(index),
       ),
     );
   }
@@ -316,7 +394,12 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final String action;
   final VoidCallback onTap;
-  const _SectionHeader({required this.eyebrow, required this.title, required this.action, required this.onTap});
+  const _SectionHeader({
+    required this.eyebrow,
+    required this.title,
+    required this.action,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -329,13 +412,24 @@ class _SectionHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(eyebrow, style: AppTypography.overline.copyWith(color: AppColors.primaryLight)),
+                Text(
+                  eyebrow,
+                  style: AppTypography.overline.copyWith(
+                    color: AppColors.primaryLight,
+                  ),
+                ),
                 const SizedBox(height: 4),
                 Text(title, style: AppTypography.headingXL),
               ],
             ),
           ),
-          GestureDetector(onTap: onTap, child: Text(action, style: AppTypography.labelMedium.copyWith(color: AppColors.cyan))),
+          GestureDetector(
+            onTap: onTap,
+            child: Text(
+              action,
+              style: AppTypography.labelMedium.copyWith(color: AppColors.cyan),
+            ),
+          ),
         ],
       ),
     );
@@ -389,13 +483,16 @@ class _FandomCarouselState extends State<_FandomCarousel> {
           child: PageView.builder(
             controller: _pageController,
             itemCount: 10000,
-            onPageChanged: (index) => setState(() => _page = index % widget.fandoms.length),
+            onPageChanged: (index) =>
+                setState(() => _page = index % widget.fandoms.length),
             itemBuilder: (_, index) => AnimatedScale(
               scale: index % widget.fandoms.length == _page ? 1 : .96,
               duration: const Duration(milliseconds: 280),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: _FandomCard(fandom: widget.fandoms[index % widget.fandoms.length]),
+                child: _FandomCard(
+                  fandom: widget.fandoms[index % widget.fandoms.length],
+                ),
               ),
             ),
           ),
@@ -436,13 +533,22 @@ class _FandomCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: FVImage(imageUrl: fandom.coverImageUrl, width: double.infinity, height: 202, borderRadius: 20),
+              child: FVImage(
+                imageUrl: fandom.coverImageUrl,
+                width: double.infinity,
+                height: 202,
+                borderRadius: 20,
+              ),
             ),
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  gradient: const LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Color(0xE60A0A0F)]),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Color(0xE60A0A0F)],
+                  ),
                 ),
               ),
             ),
@@ -453,11 +559,26 @@ class _FandomCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(fandom.category.toUpperCase(), style: AppTypography.overline.copyWith(color: AppColors.cyan)),
+                  Text(
+                    fandom.category.toUpperCase(),
+                    style: AppTypography.overline.copyWith(
+                      color: AppColors.cyan,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text(fandom.name, style: AppTypography.headingSmall, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(
+                    fandom.name,
+                    style: AppTypography.headingSmall,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 3),
-                  Text('${_formatCount(fandom.memberCount)} fans', style: AppTypography.caption.copyWith(color: Colors.white70)),
+                  Text(
+                    '${_formatCount(fandom.memberCount)} fans',
+                    style: AppTypography.caption.copyWith(
+                      color: Colors.white70,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -495,21 +616,40 @@ class _ContentCard extends StatelessWidget {
                 Positioned(
                   left: 10,
                   top: 10,
-                  child: _GlassPill(icon: PhosphorIconsRegular.lightning, text: content.contentType.label.toUpperCase()),
+                  child: _GlassPill(
+                    icon: PhosphorIconsRegular.lightning,
+                    text: content.contentType.label.toUpperCase(),
+                  ),
                 ),
                 Positioned(
                   right: 10,
                   top: 10,
-                  child: _CircleAction(icon: PhosphorIconsRegular.bookmarkSimple, onTap: () {}),
+                  child: _CircleAction(
+                    icon: PhosphorIconsRegular.bookmarkSimple,
+                    onTap: () {},
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-            Text(content.fandomName ?? 'Fandom Verse', style: AppTypography.caption.copyWith(color: AppColors.primaryLight)),
+            Text(
+              content.fandomName ?? 'Fandom Verse',
+              style: AppTypography.caption.copyWith(
+                color: AppColors.primaryLight,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(content.title, style: AppTypography.headingMedium, maxLines: 2, overflow: TextOverflow.ellipsis),
+            Text(
+              content.title,
+              style: AppTypography.headingMedium,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 5),
-            Text('${content.readTimeMinutes} min read  •  ${content.author}', style: AppTypography.caption),
+            Text(
+              '${content.readTimeMinutes} min read  •  ${content.author}',
+              style: AppTypography.caption,
+            ),
           ],
         ),
       ),
@@ -547,13 +687,29 @@ class _EventCard extends StatelessWidget {
                     Align(
                       alignment: Alignment.center,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-                        decoration: BoxDecoration(color: AppColors.background.withOpacity(.88), borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 9,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.background.withOpacity(.88),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(DateFormat('MMM').format(event.eventDate).toUpperCase(), style: AppTypography.overline.copyWith(color: AppColors.cyan)),
-                            Text(DateFormat('dd').format(event.eventDate), style: AppTypography.displaySmall),
+                            Text(
+                              DateFormat('MMM')
+                                  .format(event.eventDate)
+                                  .toUpperCase(),
+                              style: AppTypography.overline.copyWith(
+                                color: AppColors.cyan,
+                              ),
+                            ),
+                            Text(
+                              DateFormat('dd').format(event.eventDate),
+                              style: AppTypography.displaySmall,
+                            ),
                           ],
                         ),
                       ),
@@ -568,11 +724,38 @@ class _EventCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(event.category.toUpperCase(), style: AppTypography.overline.copyWith(color: AppColors.primaryLight)),
+                      Text(
+                        event.category.toUpperCase(),
+                        style: AppTypography.overline.copyWith(
+                          color: AppColors.primaryLight,
+                        ),
+                      ),
                       const SizedBox(height: 6),
-                      Text(event.title, style: AppTypography.headingMedium, maxLines: 3, overflow: TextOverflow.ellipsis),
+                      Text(
+                        event.title,
+                        style: AppTypography.headingMedium,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       const SizedBox(height: 10),
-                      Row(children: [FVIcon(PhosphorIconsRegular.mapPin, size: 15, color: AppColors.textSecondary), const SizedBox(width: 4), Expanded(child: Text('${event.city} • ${event.venue}', style: AppTypography.caption, maxLines: 2, overflow: TextOverflow.ellipsis))]),
+                      Row(
+                        children: [
+                          FVIcon(
+                            PhosphorIconsRegular.mapPin,
+                            size: 15,
+                            color: AppColors.textSecondary,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '${event.city} • ${event.venue}',
+                              style: AppTypography.caption,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -598,9 +781,37 @@ class _IconButton extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          Container(width: 40, height: 40, decoration: BoxDecoration(color: AppColors.card, shape: BoxShape.circle, border: Border.all(color: AppColors.borderSubtle)), child: FVIcon(icon, size: 21, color: AppColors.textPrimary)),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.borderSubtle),
+            ),
+            child: FVIcon(icon, size: 21, color: AppColors.textPrimary),
+          ),
           if (badge != null)
-            Positioned(right: -1, top: -1, child: Container(width: 17, height: 17, decoration: BoxDecoration(color: AppColors.accent, shape: BoxShape.circle), alignment: Alignment.center, child: Text(badge!, style: AppTypography.labelSmall.copyWith(color: Colors.white, fontSize: 8)))),
+            Positioned(
+              right: -1,
+              top: -1,
+              child: Container(
+                width: 17,
+                height: 17,
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  badge!,
+                  style: AppTypography.labelSmall.copyWith(
+                    color: Colors.white,
+                    fontSize: 8,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -613,7 +824,20 @@ class _CircleAction extends StatelessWidget {
   const _CircleAction({required this.icon, required this.onTap});
 
   @override
-  Widget build(BuildContext context) => GestureDetector(onTap: onTap, child: ClipOval(child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), child: Container(width: 40, height: 40, color: Colors.white.withOpacity(.12), child: FVIcon(icon, size: 19, color: Colors.white)))));
+  Widget build(BuildContext context) => GestureDetector(
+    onTap: onTap,
+    child: ClipOval(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Container(
+          width: 40,
+          height: 40,
+          color: Colors.white.withOpacity(.12),
+          child: FVIcon(icon, size: 19, color: Colors.white),
+        ),
+      ),
+    ),
+  );
 }
 
 class _GlassPill extends StatelessWidget {
@@ -635,7 +859,13 @@ class _GlassPill extends StatelessWidget {
             children: [
               FVIcon(icon, size: 13, color: AppColors.cyan),
               const SizedBox(width: 5),
-              Text(text, style: AppTypography.overline.copyWith(color: Colors.white, fontSize: 8)),
+              Text(
+                text,
+                style: AppTypography.overline.copyWith(
+                  color: Colors.white,
+                  fontSize: 8,
+                ),
+              ),
             ],
           ),
         ),
@@ -652,33 +882,64 @@ class _HomeSkeleton extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Container(height: 55, decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(16))),
+          Container(
+            height: 55,
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
           const SizedBox(height: 18),
-          Container(height: 285, decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(28))),
+          Container(
+            height: 285,
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(28),
+            ),
+          ),
           const SizedBox(height: 18),
           SizedBox(
             height: 80,
             child: Row(
-              children: List.generate(4, (i) => Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(right: i == 3 ? 0 : 10),
-                  decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(18)),
+              children: List.generate(
+                4,
+                (i) => Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(right: i == 3 ? 0 : 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                  ),
                 ),
-              )),
+              ),
             ),
           ),
           const SizedBox(height: 30),
-          Container(width: 190, height: 25, decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(8))),
+          Container(
+            width: 190,
+            height: 25,
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
           const SizedBox(height: 14),
           SizedBox(
             height: 202,
             child: Row(
-              children: List.generate(2, (i) => Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(right: i == 1 ? 0 : 12),
-                  decoration: BoxDecoration(color: AppColors.card, borderRadius: BorderRadius.circular(20)),
+              children: List.generate(
+                2,
+                (i) => Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(right: i == 1 ? 0 : 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.card,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
                 ),
-              )),
+              ),
             ),
           ),
         ],

@@ -1,436 +1,438 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+
 import '../../../app/routes/app_routes.dart';
-import '../../../app/theme/app_colors.dart';
-import '../../../app/theme/app_spacing.dart';
-import '../../../app/theme/app_typography.dart';
-import '../../../core/widgets/fv_icon.dart';
 import '../../../core/widgets/fv_theme_toggle.dart';
 import '../controllers/admin_dashboard_controller.dart';
+import '../theme/admin_theme.dart';
 
 class AdminDashboardView extends StatelessWidget {
   const AdminDashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.isRegistered<AdminDashboardController>()
+    final c = Get.isRegistered<AdminDashboardController>()
         ? Get.find<AdminDashboardController>()
         : Get.put(AdminDashboardController());
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Admin Console'),
-        actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 4),
-            child: FVThemeToggle(),
-          ),
-          IconButton(
-            icon: const FVIcon(PhosphorIconsRegular.signOut),
-            tooltip: 'Logout',
-            onPressed: () => _confirmLogout(context, controller),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: controller.loadDashboardData,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Welcome Message
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.primary.withValues(alpha: 0.85),
-                        AppColors.cyan.withValues(alpha: 0.85),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.2),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 28,
-                        backgroundColor: Colors.white.withValues(alpha: 0.2),
-                        child: const FVIcon(
-                          PhosphorIconsFill.shieldCheck,
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Welcome, Admin',
-                              style: GoogleFonts.outfit(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Fandom Verse Pocket Edition • Management Overview',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: Colors.white.withValues(alpha: 0.85),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
+    return HoloScaffold(
+      title: 'ADMIN // CONSOLE',
 
-                // Summary Cards / Stats
-                Text('Overview Statistics', style: AppTypography.headingMedium),
-                const SizedBox(height: 12),
-                Obx(() => Row(
-                      children: [
-                        Expanded(
-                          child: _SummaryCard(
-                            title: 'Total Users',
-                            count: '${controller.totalUsersCount}',
-                            icon: PhosphorIconsRegular.users,
-                            accentColor: AppColors.primary,
-                            onTap: () => Get.toNamed(AppRoutes.adminUsers),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _SummaryCard(
-                            title: 'Total Posts',
-                            count: '${controller.totalPostsCount}',
-                            icon: PhosphorIconsRegular.article,
-                            accentColor: AppColors.rose,
-                            onTap: () {
-                              controller.moderationTabIndex.value = 0;
-                              Get.toNamed(AppRoutes.adminContent);
-                            },
-                          ),
-                        ),
-                      ],
-                    )),
-                const SizedBox(height: 12),
-                Obx(() => Row(
-                      children: [
-                        Expanded(
-                          child: _SummaryCard(
-                            title: 'Total Events',
-                            count: '${controller.totalEventsCount}',
-                            icon: PhosphorIconsRegular.calendarBlank,
-                            accentColor: AppColors.cyan,
-                            onTap: () {
-                              controller.moderationTabIndex.value = 1;
-                              Get.toNamed(AppRoutes.adminContent);
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _SummaryCard(
-                            title: 'Merchandise',
-                            count: '${controller.totalProductsCount}',
-                            icon: PhosphorIconsRegular.storefront,
-                            accentColor: AppColors.accent,
-                            onTap: () {
-                              controller.moderationTabIndex.value = 2;
-                              Get.toNamed(AppRoutes.adminContent);
-                            },
-                          ),
-                        ),
-                      ],
-                    )),
-                const SizedBox(height: AppSpacing.xl),
+      actions: [
+        // Global Fandom Verse Light / Dark mode.
+        // Uses the same theme system as the Fan side.
+        const FVThemeToggle(),
 
-                // Quick Navigation Menu
-                Text('Quick Management Navigation', style: AppTypography.headingMedium),
-                const SizedBox(height: 12),
-                _NavMenuTile(
-                  title: 'Content & Event Moderation',
-                  subtitle: 'Manage articles, conventions, and merchandise catalog',
-                  icon: PhosphorIconsRegular.pencilSimple,
-                  color: AppColors.rose,
-                  badgeText: '${controller.posts.length + controller.events.length + controller.products.length}',
-                  onTap: () => Get.toNamed(AppRoutes.adminContent),
-                ),
-                const SizedBox(height: 10),
-                _NavMenuTile(
-                  title: 'User Management',
-                  subtitle: 'Browse fans, search accounts, edit roles, and view profiles',
-                  icon: PhosphorIconsRegular.usersThree,
-                  color: AppColors.primary,
-                  badgeText: '${controller.users.length}',
-                  onTap: () => Get.toNamed(AppRoutes.adminUsers),
-                ),
-                const SizedBox(height: 10),
-                _NavMenuTile(
-                  title: 'Category Management',
-                  subtitle: 'Add, update or delete fandom categories (Anime, Gaming, etc.)',
-                  icon: PhosphorIconsRegular.tag,
-                  color: AppColors.plum,
-                  badgeText: '${controller.categories.length}',
-                  onTap: () => Get.toNamed(AppRoutes.adminCategories),
-                ),
-                const SizedBox(height: AppSpacing.xl),
+        const SizedBox(width: 8),
 
-                // Recent Activity
-                Text('Recent Activity Logs', style: AppTypography.headingMedium),
-                const SizedBox(height: 12),
-                Obx(() => Column(
-                      children: controller.recentActivity.take(4).map((act) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.card,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.border),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: FVIcon(
-                                  PhosphorIconsRegular.checkCircle,
-                                  size: 16,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(act, style: AppTypography.bodyMedium),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    )),
-                const SizedBox(height: AppSpacing.lg),
-
-                // Logout Button
-                OutlinedButton.icon(
-                  onPressed: () => _confirmLogout(context, controller),
-                  icon: FVIcon(PhosphorIconsRegular.signOut, color: AppColors.error),
-                  label: Text('Log Out of Admin Console', style: TextStyle(color: AppColors.error)),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppColors.error.withValues(alpha: 0.5)),
-                    minimumSize: const Size(double.infinity, 50),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
+        // Existing logout functionality — unchanged.
+        HoloIconAction(
+          icon: PhosphorIconsRegular.signOut,
+          color: AdminTheme.violet,
+          tooltip: 'Logout',
+          onPressed: () => showHoloConfirm(
+            title: 'End Session',
+            message: 'Log out of the admin console?',
+            confirmLabel: 'Log Out',
+            onConfirm: c.logout,
           ),
         ),
-      ),
-    );
-  }
 
-  void _confirmLogout(BuildContext context, AdminDashboardController controller) {
-    Get.defaultDialog(
-      title: 'Confirm Logout',
-      titleStyle: AppTypography.headingMedium,
-      middleText: 'Are you sure you want to log out of the admin console?',
-      middleTextStyle: AppTypography.bodyMedium,
-      textConfirm: 'Log Out',
-      textCancel: 'Cancel',
-      confirmTextColor: Colors.white,
-      buttonColor: AppColors.error,
-      onConfirm: () {
-        Get.back();
-        controller.logout();
-      },
-    );
-  }
-}
+        const SizedBox(width: 8),
+      ],
 
-class _SummaryCard extends StatelessWidget {
-  final String title;
-  final String count;
-  final IconData icon;
-  final Color accentColor;
-  final VoidCallback onTap;
-
-  const _SummaryCard({
-    required this.title,
-    required this.count,
-    required this.icon,
-    required this.accentColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: accentColor.withValues(alpha: 0.3)),
-            boxShadow: [
-              BoxShadow(
-                color: accentColor.withValues(alpha: 0.08),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
+      body: RefreshIndicator(
+        color: AdminTheme.violet,
+        backgroundColor: AdminTheme.bgPanel,
+        onRefresh: c.loadDashboardData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(18),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: FVIcon(icon, color: accentColor, size: 20),
-                  ),
-                  FVIcon(
-                    PhosphorIconsRegular.caretRight,
-                    color: AppColors.textTertiary,
-                    size: 16,
-                  ),
-                ],
-              ),
+              const _StatusHeader(),
+
+              const SizedBox(height: 22),
+
+              const _SectionLabel('OVERVIEW STATISTICS'),
+
               const SizedBox(height: 12),
-              Text(
-                count,
-                style: GoogleFonts.outfit(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                title,
-                style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
-class _NavMenuTile extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final String badgeText;
-  final VoidCallback onTap;
-
-  const _NavMenuTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    required this.badgeText,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: FVIcon(icon, color: color, size: 24),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              Obx(
+                () => Row(
                   children: [
-                    Text(title, style: AppTypography.headingSmall),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+                    Expanded(
+                      child: _StatCard(
+                        'Users',
+                        '${c.totalUsersCount}',
+                        PhosphorIconsRegular.usersThree,
+                        AdminTheme.violet,
+                        () => Get.toNamed(AppRoutes.adminUsers),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
+                        'Posts',
+                        '${c.totalPostsCount}',
+                        PhosphorIconsRegular.article,
+                        AdminTheme.violet,
+                        () {
+                          c.moderationTabIndex.value = 0;
+                          Get.toNamed(AppRoutes.adminContent);
+                        },
+                      ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+
+              const SizedBox(height: 12),
+
+              Obx(
+                () => Row(
+                  children: [
+                    Expanded(
+                      child: _StatCard(
+                        'Events',
+                        '${c.totalEventsCount}',
+                        PhosphorIconsRegular.calendarBlank,
+                        AdminTheme.violet,
+                        () {
+                          c.moderationTabIndex.value = 1;
+                          Get.toNamed(AppRoutes.adminContent);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
+                        'Merch',
+                        '${c.totalProductsCount}',
+                        PhosphorIconsRegular.storefront,
+                        AdminTheme.violet,
+                        () {
+                          c.moderationTabIndex.value = 2;
+                          Get.toNamed(AppRoutes.adminContent);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                child: Text(
-                  badgeText,
-                  style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+              ),
+
+              const SizedBox(height: 26),
+
+              const _SectionLabel('QUICK NAVIGATION'),
+
+              const SizedBox(height: 12),
+
+              Obx(
+                () => _NavTile(
+                  title: 'Content & Event Moderation',
+                  subtitle: 'Posts, conventions and the merchandise catalog',
+                  icon: PhosphorIconsRegular.pencilSimple,
+                  color: AdminTheme.violet,
+                  count: c.posts.length + c.events.length + c.products.length,
+                  onTap: () => Get.toNamed(AppRoutes.adminContent),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              Obx(
+                () => _NavTile(
+                  title: 'User Management',
+                  subtitle: 'Browse, search, edit and remove fan accounts',
+                  icon: PhosphorIconsRegular.usersThree,
+                  color: AdminTheme.violet,
+                  count: c.users.length,
+                  onTap: () => Get.toNamed(AppRoutes.adminUsers),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              Obx(
+                () => _NavTile(
+                  title: 'Category Management',
+                  subtitle: 'Fandom categories shown across the app',
+                  icon: PhosphorIconsRegular.tag,
+                  color: AdminTheme.violet,
+                  count: c.categories.length,
+                  onTap: () => Get.toNamed(AppRoutes.adminCategories),
+                ),
+              ),
+
+              const SizedBox(height: 26),
+
+              const _SectionLabel('SYSTEM ACTIVITY LOG'),
+
+              const SizedBox(height: 12),
+
+              Obx(() {
+                final log = c.recentActivity.take(6).toList();
+
+                if (log.isEmpty) {
+                  return HoloPanel(
+                    child: Text('No activity yet.', style: AdminTheme.mono()),
+                  );
+                }
+
+                return HoloPanel(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 4,
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              FVIcon(
-                PhosphorIconsRegular.caretRight,
-                color: AppColors.textTertiary,
-                size: 16,
-              ),
+                  child: Column(
+                    children: List.generate(log.length, (i) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 12,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              PhosphorIconsFill.circle,
+                              size: 6,
+                              color: AdminTheme.violet,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                log[i],
+                                style: AdminTheme.mono(
+                                  size: 12.5,
+                                  color: AdminTheme.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 30),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* STATUS HEADER                                                              */
+/* -------------------------------------------------------------------------- */
+
+class _StatusHeader extends StatelessWidget {
+  const _StatusHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return HoloPanel(
+      glowColor: AdminTheme.violet,
+      child: Row(
+        children: [
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: AdminTheme.holoBorder,
+              boxShadow: AdminTheme.glow(AdminTheme.violet, alpha: .28),
+            ),
+            child: const Icon(
+              PhosphorIconsFill.shieldCheck,
+              color: Colors.white,
+              size: 26,
+            ),
+          ),
+
+          const SizedBox(width: 16),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('WELCOME, OPERATOR', style: AdminTheme.display(size: 15)),
+
+                const SizedBox(height: 4),
+
+                Row(
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: AdminTheme.violet,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+
+                    const SizedBox(width: 6),
+
+                    Flexible(
+                      child: Text(
+                        'FandomVerse backend · SYSTEM ONLINE',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AdminTheme.mono(
+                          size: 11.5,
+                          color: AdminTheme.violet,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* SECTION LABEL                                                              */
+/* -------------------------------------------------------------------------- */
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: AdminTheme.mono(
+        size: 12,
+        color: AdminTheme.textFaint,
+        w: FontWeight.w700,
+      ),
+    );
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* STAT CARD                                                                  */
+/* -------------------------------------------------------------------------- */
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _StatCard(this.label, this.value, this.icon, this.color, this.onTap);
+
+  @override
+  Widget build(BuildContext context) {
+    return HoloPanel(
+      glowColor: color,
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              HoloIconBox(icon: icon, color: color, size: 18),
+              Icon(
+                PhosphorIconsRegular.caretRight,
+                size: 14,
+                color: AdminTheme.textFaint,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          Text(value, style: AdminTheme.display(size: 26, color: color)),
+
+          const SizedBox(height: 2),
+
+          Text(label.toUpperCase(), style: AdminTheme.mono(size: 11)),
+        ],
+      ),
+    );
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* NAVIGATION TILE                                                            */
+/* -------------------------------------------------------------------------- */
+
+class _NavTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final int count;
+  final VoidCallback onTap;
+
+  const _NavTile({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.count,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return HoloPanel(
+      glowColor: color,
+      onTap: onTap,
+      child: Row(
+        children: [
+          HoloIconBox(icon: icon, color: color, size: 20),
+
+          const SizedBox(width: 14),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: AdminTheme.body(w: FontWeight.w700)),
+
+                const SizedBox(height: 3),
+
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AdminTheme.body(
+                    size: 12,
+                    color: AdminTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          HoloBadge(text: '$count', color: color),
+
+          const SizedBox(width: 8),
+
+          Icon(
+            PhosphorIconsRegular.caretRight,
+            size: 14,
+            color: AdminTheme.textFaint,
+          ),
+        ],
       ),
     );
   }

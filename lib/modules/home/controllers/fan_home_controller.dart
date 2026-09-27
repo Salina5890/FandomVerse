@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+
 import '../../../data/models/content_model.dart';
 import '../../../data/models/event_model.dart';
 import '../../../data/models/fandom_model.dart';
@@ -18,11 +19,11 @@ class FanHomeController extends GetxController {
 
   void _loadHomeData() async {
     isLoading.value = true;
-    
+
     featuredFandoms.value = SeedDataService.featuredFandoms;
     featuredContent.value = SeedDataService.featuredContent.take(5).toList();
     upcomingEvents.value = SeedDataService.upcomingEvents.take(3).toList();
-    
+
     isLoading.value = false;
   }
 }

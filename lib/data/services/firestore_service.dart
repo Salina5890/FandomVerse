@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+
 import '../models/user_model.dart';
 import '../models/content_model.dart';
 import '../models/event_model.dart';
@@ -34,10 +35,10 @@ class FirestoreService extends GetxService {
   Future<void> saveUser(UserModel user) async {
     if (_firestore == null) return;
     try {
-      await _firestore!.collection('users').doc(user.id).set(
-        user.toMap(),
-        SetOptions(merge: true),
-      );
+      await _firestore!
+          .collection('users')
+          .doc(user.id)
+          .set(user.toMap(), SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving user to Firestore: $e');
     }
@@ -59,7 +60,10 @@ class FirestoreService extends GetxService {
   Future<List<UserModel>> getAllUsers() async {
     if (_firestore == null) return [];
     try {
-      final snapshot = await _firestore!.collection('users').get();
+      final snapshot = await _firestore!
+          .collection('users')
+          .get()
+          .timeout(const Duration(seconds: 6));
       return snapshot.docs.map((doc) => UserModel.fromMap(doc.data())).toList();
     } catch (e) {
       debugPrint('Error fetching users: $e');
@@ -81,10 +85,10 @@ class FirestoreService extends GetxService {
   Future<void> saveContent(ContentModel item) async {
     if (_firestore == null) return;
     try {
-      await _firestore!.collection('posts').doc(item.id).set(
-        item.toMap(),
-        SetOptions(merge: true),
-      );
+      await _firestore!
+          .collection('posts')
+          .doc(item.id)
+          .set(item.toMap(), SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving post: $e');
     }
@@ -93,8 +97,13 @@ class FirestoreService extends GetxService {
   Future<List<ContentModel>> getAllContent() async {
     if (_firestore == null) return [];
     try {
-      final snapshot = await _firestore!.collection('posts').get();
-      return snapshot.docs.map((doc) => ContentModel.fromMap(doc.data())).toList();
+      final snapshot = await _firestore!
+          .collection('posts')
+          .get()
+          .timeout(const Duration(seconds: 6));
+      return snapshot.docs
+          .map((doc) => ContentModel.fromMap(doc.data()))
+          .toList();
     } catch (e) {
       debugPrint('Error fetching posts: $e');
       return [];
@@ -115,10 +124,10 @@ class FirestoreService extends GetxService {
   Future<void> saveEvent(EventModel item) async {
     if (_firestore == null) return;
     try {
-      await _firestore!.collection('events').doc(item.id).set(
-        item.toMap(),
-        SetOptions(merge: true),
-      );
+      await _firestore!
+          .collection('events')
+          .doc(item.id)
+          .set(item.toMap(), SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving event: $e');
     }
@@ -127,8 +136,13 @@ class FirestoreService extends GetxService {
   Future<List<EventModel>> getAllEvents() async {
     if (_firestore == null) return [];
     try {
-      final snapshot = await _firestore!.collection('events').get();
-      return snapshot.docs.map((doc) => EventModel.fromMap(doc.data())).toList();
+      final snapshot = await _firestore!
+          .collection('events')
+          .get()
+          .timeout(const Duration(seconds: 6));
+      return snapshot.docs
+          .map((doc) => EventModel.fromMap(doc.data()))
+          .toList();
     } catch (e) {
       debugPrint('Error fetching events: $e');
       return [];
@@ -149,10 +163,10 @@ class FirestoreService extends GetxService {
   Future<void> saveProduct(ProductModel item) async {
     if (_firestore == null) return;
     try {
-      await _firestore!.collection('merchandise').doc(item.id).set(
-        item.toMap(),
-        SetOptions(merge: true),
-      );
+      await _firestore!
+          .collection('merchandise')
+          .doc(item.id)
+          .set(item.toMap(), SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving merchandise: $e');
     }
@@ -161,8 +175,13 @@ class FirestoreService extends GetxService {
   Future<List<ProductModel>> getAllProducts() async {
     if (_firestore == null) return [];
     try {
-      final snapshot = await _firestore!.collection('merchandise').get();
-      return snapshot.docs.map((doc) => ProductModel.fromMap(doc.data())).toList();
+      final snapshot = await _firestore!
+          .collection('merchandise')
+          .get()
+          .timeout(const Duration(seconds: 6));
+      return snapshot.docs
+          .map((doc) => ProductModel.fromMap(doc.data()))
+          .toList();
     } catch (e) {
       debugPrint('Error fetching merchandise: $e');
       return [];
@@ -183,8 +202,13 @@ class FirestoreService extends GetxService {
   Future<void> saveCategory(Map<String, dynamic> category) async {
     if (_firestore == null) return;
     try {
-      final id = category['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
-      await _firestore!.collection('categories').doc(id).set(category, SetOptions(merge: true));
+      final id =
+          category['id']?.toString() ??
+          DateTime.now().millisecondsSinceEpoch.toString();
+      await _firestore!
+          .collection('categories')
+          .doc(id)
+          .set(category, SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving category: $e');
     }
@@ -193,7 +217,10 @@ class FirestoreService extends GetxService {
   Future<List<Map<String, dynamic>>> getAllCategories() async {
     if (_firestore == null) return [];
     try {
-      final snapshot = await _firestore!.collection('categories').get();
+      final snapshot = await _firestore!
+          .collection('categories')
+          .get()
+          .timeout(const Duration(seconds: 6));
       return snapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
       debugPrint('Error fetching categories: $e');
@@ -215,8 +242,13 @@ class FirestoreService extends GetxService {
   Future<void> saveDiscussion(Map<String, dynamic> discussion) async {
     if (_firestore == null) return;
     try {
-      final id = discussion['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
-      await _firestore!.collection('discussions').doc(id).set(discussion, SetOptions(merge: true));
+      final id =
+          discussion['id']?.toString() ??
+          DateTime.now().millisecondsSinceEpoch.toString();
+      await _firestore!
+          .collection('discussions')
+          .doc(id)
+          .set(discussion, SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving discussion: $e');
     }
@@ -230,7 +262,9 @@ class FirestoreService extends GetxService {
         query = query.where('fandomId', isEqualTo: fandomId);
       }
       final snapshot = await query.get();
-      return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      return snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
     } catch (e) {
       debugPrint('Error fetching discussions: $e');
       return [];
@@ -286,7 +320,9 @@ class FirestoreService extends GetxService {
   Future<void> submitInquiry(Map<String, dynamic> inquiry) async {
     if (_firestore == null) return;
     try {
-      final id = inquiry['id']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
+      final id =
+          inquiry['id']?.toString() ??
+          DateTime.now().millisecondsSinceEpoch.toString();
       await _firestore!.collection('inquiries').doc(id).set(inquiry);
     } catch (e) {
       debugPrint('Error submitting inquiry: $e');
@@ -300,7 +336,9 @@ class FirestoreService extends GetxService {
     try {
       final snapshot = await _firestore!.collection('faqs').get();
       if (snapshot.docs.isNotEmpty) {
-        return snapshot.docs.map((doc) => FaqModel.fromMap(doc.data())).toList();
+        return snapshot.docs
+            .map((doc) => FaqModel.fromMap(doc.data()))
+            .toList();
       }
     } catch (e) {
       debugPrint('Error loading FAQs: $e');
@@ -311,7 +349,10 @@ class FirestoreService extends GetxService {
   Future<void> saveFaq(FaqModel faq) async {
     if (_firestore == null) return;
     try {
-      await _firestore!.collection('faqs').doc(faq.id).set(faq.toMap(), SetOptions(merge: true));
+      await _firestore!
+          .collection('faqs')
+          .doc(faq.id)
+          .set(faq.toMap(), SetOptions(merge: true));
     } catch (e) {
       debugPrint('Error saving FAQ: $e');
     }
@@ -337,23 +378,35 @@ class FirestoreService extends GetxService {
       if (eventsCheck.docs.isEmpty) {
         final batch = _firestore!.batch();
         for (final item in SeedDataService.events) {
-          batch.set(_firestore!.collection('events').doc(item.id), item.toMap());
+          batch.set(
+            _firestore!.collection('events').doc(item.id),
+            item.toMap(),
+          );
         }
         await batch.commit();
       }
 
       // Check merchandise
-      final merchCheck = await _firestore!.collection('merchandise').limit(1).get();
+      final merchCheck = await _firestore!
+          .collection('merchandise')
+          .limit(1)
+          .get();
       if (merchCheck.docs.isEmpty) {
         final batch = _firestore!.batch();
         for (final item in SeedDataService.products) {
-          batch.set(_firestore!.collection('merchandise').doc(item.id), item.toMap());
+          batch.set(
+            _firestore!.collection('merchandise').doc(item.id),
+            item.toMap(),
+          );
         }
         await batch.commit();
       }
 
       // Check categories
-      final catCheck = await _firestore!.collection('categories').limit(1).get();
+      final catCheck = await _firestore!
+          .collection('categories')
+          .limit(1)
+          .get();
       if (catCheck.docs.isEmpty) {
         final batch = _firestore!.batch();
         for (final item in SeedDataService.categories) {
@@ -374,13 +427,25 @@ class FirestoreService extends GetxService {
       }
 
       // Check demo admin and demo fan
-      final adminCheck = await _firestore!.collection('users').doc(SeedDataService.demoAdmin.id).get();
+      final adminCheck = await _firestore!
+          .collection('users')
+          .doc(SeedDataService.demoAdmin.id)
+          .get();
       if (!adminCheck.exists) {
-        await _firestore!.collection('users').doc(SeedDataService.demoAdmin.id).set(SeedDataService.demoAdmin.toMap());
+        await _firestore!
+            .collection('users')
+            .doc(SeedDataService.demoAdmin.id)
+            .set(SeedDataService.demoAdmin.toMap());
       }
-      final fanCheck = await _firestore!.collection('users').doc(SeedDataService.demoFan.id).get();
+      final fanCheck = await _firestore!
+          .collection('users')
+          .doc(SeedDataService.demoFan.id)
+          .get();
       if (!fanCheck.exists) {
-        await _firestore!.collection('users').doc(SeedDataService.demoFan.id).set(SeedDataService.demoFan.toMap());
+        await _firestore!
+            .collection('users')
+            .doc(SeedDataService.demoFan.id)
+            .set(SeedDataService.demoFan.toMap());
       }
     } catch (e) {
       debugPrint('Firestore seed notice: $e');
