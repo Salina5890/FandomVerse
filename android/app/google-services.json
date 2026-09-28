@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "677868482625",
+    "project_id": "fandom-6d48a",
+    "storage_bucket": "fandom-6d48a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:677868482625:android:632bdef403aa5f9172d6c0",
+        "android_client_info": {
+          "package_name": "com.fandomverse.fandom_verse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "677868482625-lri9ukssbn10qts25tnrn7na0fhfc4gh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0wkwAEn78AJwsIPMi-rxRLhDOdVWzufE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "677868482625-lri9ukssbn10qts25tnrn7na0fhfc4gh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "677868482625-1odfbkahibiuha866dhdqqqamcfrr8j8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.fandomverse.fandomVerse"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Fandom Verse Pocket Edition",
+  "short_name": "Fandom Verse",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0B0A14",
+  "theme_color": "#0B0A14",
+  "description": "Fandom Verse Pocket Edition"
+}
